@@ -1,0 +1,26 @@
+b OR n -> o
+t OR s -> u
+g AND i -> j
+19138 -> b
+k AND m -> n
+u -> a
+0 -> c
+c LSHIFT 1 -> t
+e OR f -> g
+b RSHIFT 1 -> v
+1 AND r -> s
+b AND n -> p
+x RSHIFT 2 -> y
+s LSHIFT 15 -> w
+b RSHIFT 5 -> f
+o AND q -> r
+b RSHIFT 2 -> d
+b RSHIFT 3 -> e
+d OR j -> k
+NOT p -> q
+v OR w -> x
+d AND j -> l
+NOT l -> m
+e AND f -> h
+x RSHIFT 3 -> z
+NOT h -> i
