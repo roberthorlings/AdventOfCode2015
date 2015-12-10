@@ -22,7 +22,7 @@ abstract class Simulation {
 
   def run() {
     afterDelay(0) {
-      println("*** simulation started, time = " + currentTime + " ***")
+      //println("*** simulation started, time = " + currentTime + " ***")
     }
     loop()
   }

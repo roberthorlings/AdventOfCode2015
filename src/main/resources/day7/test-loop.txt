@@ -1,0 +1,5 @@
+37 -> x
+14 -> y
+x AND y -> z
+z LSHIFT 1 -> a
+a -> x
