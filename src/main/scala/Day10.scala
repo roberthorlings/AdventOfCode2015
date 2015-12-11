@@ -2,11 +2,20 @@ object Day10 {
 
   def lookAndSay(input: String): String = {
     val serieRegex = "^(\\d)(\\1*)(.*)".r
+    var output = new StringBuilder
+    var current = input
 
-    input match {
-      case serieRegex(digit,otherDigits,rest) => "" + (1+otherDigits.length) + digit + lookAndSay(rest)
-      case _ => ""
+    while (current.length > 0) {
+      current match {
+        case serieRegex(digit, otherDigits, rest) => {
+          output.append(1 + otherDigits.length).append(digit)
+          current = rest
+        }
+        case _ => return output.toString()
+      }
     }
+
+    return output.toString()
   }
 
   def main(args: Array[String]) {
@@ -15,11 +24,13 @@ object Day10 {
 
     var current = input
     for( i <- 0 until iterations ) {
+      println( "Iteration " + i )
       current = lookAndSay(current)
     }
 
     println( "Input:   " + input )
-    println( "Output:  " + current )
+    //println( "Output:  " + current )
+    println( "Length:  " + current.length )
   }
 }
 
