@@ -3,17 +3,27 @@ object Day10 {
   def lookAndSay(input: String): String = {
     val serieRegex = "^(\\d)(\\1*)(.*)".r
     var output = new StringBuilder
-    var current = input
 
-    while (current.length > 0) {
-      current match {
-        case serieRegex(digit, otherDigits, rest) => {
-          output.append(1 + otherDigits.length).append(digit)
-          current = rest
+    // Loop through the characters
+    var currentChar = ' '
+    var currentLength = 0
+
+    for( i <- 0 until input.size ) {
+      if( input(i) == currentChar ) {
+        currentLength = currentLength + 1
+      } else {
+        // Store previous serie
+        if( currentChar != ' ' ) {
+          output.append(currentLength).append(currentChar)
         }
-        case _ => return output.toString()
+
+        currentChar = input(i)
+        currentLength = 1
       }
     }
+
+    // Append the last serie
+    output.append(currentLength).append(currentChar)
 
     return output.toString()
   }
