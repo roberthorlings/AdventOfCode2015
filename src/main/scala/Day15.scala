@@ -42,18 +42,27 @@ object Day15 {
   def main(args: Array[String]) {
     val filename = if (args.size > 0) args(0) else "/day15/input.txt"
     val total = if (args.size > 1) args(1).toLong else 100
+    val calories = if (args.size > 2) args(2).toLong else 0
+
 
     val ingredients = loadData(filename)
-    val configurations  = getConfigurations(ingredients, total)
+    val configurations = getConfigurations(ingredients, total)
 
     println("Computing best configuration out of " + configurations.size + " possibilities")
+    if (calories > 0)
+      println("  for # calories being exactly " + calories)
 
-    for( ingredient <- ingredients )
-      println( "- " + ingredient )
+    for (ingredient <- ingredients)
+      println("- " + ingredient)
 
-    val scores = configurations map( (config) => score( ingredients, config ) )
-    val best = scores.maxBy( _.score )
+    val scores = configurations map ((config) => score(ingredients, config))
+    val validScores = if (calories == 0) scores else scores.filter(_.calories == calories)
 
-    println("Best configuration: " + best)
+    if (validScores.size == 0) {
+      println("No valid configuration found for " + calories + " calories")
+    } else {
+      val best = validScores.maxBy(_.score)
+      println("Best configuration: " + best)
+    }
   }
 }
