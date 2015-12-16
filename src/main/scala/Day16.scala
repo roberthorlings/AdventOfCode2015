@@ -1,5 +1,4 @@
 object Day16 {
-  type Property = String
   class Aunt(val name: String, val properties: Map[Property, Int]) {
     override def toString() = name //  + ": " + properties.mkString(", ")
 
@@ -10,8 +9,7 @@ object Day16 {
     def patternScore(pattern: Pattern): Int = {
       val scores = pattern.properties map { case (property, value) =>
         properties.get(property) match {
-          case Some(actualValue) if( value == actualValue ) => 1
-          case Some(actualValue ) if( value != actualValue ) => -1
+          case Some(actualValue) => if( propertyMatcher(property, value)(actualValue) ) 1 else -1
           case None => 0
         }
       }
@@ -19,6 +17,15 @@ object Day16 {
       if(scores.exists( _ == -1 )) -1 else scores.sum
     }
   }
+
+  def propertyMatcher(property: String, value: Int): (Int => Boolean) = property match {
+    case "cats" | "trees" => ( (actual: Int) => actual > value )
+    case "pomeranians" | "goldfish" => ( (actual: Int) => actual < value )
+    case _ => ( (actual: Int) => value == actual )
+  }
+
+  // Properties are just strings
+  type Property = String
 
   // A pattern to search for is actually a prototype aunt
   type Pattern = Aunt
