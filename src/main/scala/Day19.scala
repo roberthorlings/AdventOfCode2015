@@ -83,10 +83,23 @@ object Day19 {
       }
 
       println("# possibilities: " + possibilities.size)
-    } else {
+    } else if( part == 2 ) {
       val initial = Set("e")
 
       println("# iterations before reaching [" + givenChromosome + "]: " + search(initial, givenChromosome, rulesMap))
+    } else if( part == 3 ) {
+      // Custom solution for the given input
+      // Molecule Ar, Rn and Y are never substituted
+      // Moreover, all substitution result in 2 other molecules plus optionally Rn and Ar plus optionally a Y and another chromosome
+
+      // Solution: count # molecules and subtract the Rn, Ar and twice the Y chromosomes
+      val numberMolecules = givenChromosome.count(_.isUpper)
+      val numberY = givenChromosome.count(_ == 'Y')
+      val numberAr = givenChromosome.sliding(2).count( _ == "Ar" )
+      val numberRn = givenChromosome.sliding(2).count( _ == "Rn" )
+
+      // -1 is needed as we already start with an electron (counts for 1)
+      println( "# iterations needed: " + ( numberMolecules - numberY * 2 - numberAr - numberRn - 1 ) )
     }
 
   }
