@@ -28,36 +28,24 @@ object Day19 {
     }
   }
 
+  def indexesOf( input: String, search: String, start: Int = 0 ): List[Int] = {
+    val pos = input.indexOf(search, start)
+
+    if( pos == -1 )
+      return List.empty[Int]
+    else
+      return pos :: indexesOf(input, search, pos + 1)
+  }
+
   def iterate(input: Chromosome, rules: Map[String, Traversable[Rule]]): Set[Chromosome] = {
     if( input == "" )
       return Set(input)
 
-    rules.keySet.toList match {
-      case Nil => Set(input)
-      case head :: tail => {
-        // Find index of the item
-        val originalPos = input.indexOf(head)
-
-        if( originalPos > -1 ) {
-          // Before current match
-          val starters = iterate(input.take(originalPos), rules - head)
-
-
-          // Current match
-          val current = rules(head).map( _.replacement )
-
-          // After current match
-          val rest = iterate(input.slice(originalPos + head.size, input.size), rules)
-
-          // Combine all entries
-          val combinations = for( part1 <- starters; part2 <- current; part3 <- rest ) yield part1 + part2 + part3
-
-          return combinations.toSet
-        } else {
-          return iterate(input, rules - head)
-        }
-      }
-    }
+    rules.keySet.toList.flatMap(
+        (original) => indexesOf(input, original).flatMap(
+          (index) => rules(original).map( (rule) => input.patch(index, rule.replacement, original.size) )
+        )
+      ).toSet
   }
 
   def main(args: Array[String]) {
