@@ -48,20 +48,46 @@ object Day19 {
       ).toSet
   }
 
+  def search( input: Set[Chromosome], goal: Chromosome, rules: Map[String, Traversable[Rule]]): Int = {
+    var iteration = 0
+    var currentSet = input
+    do {
+      currentSet = currentSet flatMap( (current) => iterate(current, rules) )
+      iteration = iteration + 1
+
+      print(".")
+
+      if( iteration % 50 == 0) {
+        println("")
+        println( "Set size: " + currentSet.size)
+      }
+
+    } while( !(currentSet.contains(goal)))
+
+    iteration
+  }
+
   def main(args: Array[String]) {
     val filename = if (args.size > 0) args(0) else "/day19/input.txt"
+    val part = if (args.size > 1) args(1).toInt else 1
 
-    val (rules, initial) = loadData(filename)
+    val (rules, givenChromosome) = loadData(filename)
     val rulesMap = rules.groupBy( _.original )
 
-    val possibilities = iterate( initial, rulesMap )
+    if( part == 1 ) {
+      val possibilities = iterate( givenChromosome, rulesMap )
 
-    println( "-- Possibilities --" )
-    for( possiblity <- possibilities ) {
-      println( "  " + possiblity)
+      println( "-- Possibilities --" )
+      for( possiblity <- possibilities ) {
+        println( "  " + possiblity)
+      }
+
+      println("# possibilities: " + possibilities.size)
+    } else {
+      val initial = Set("e")
+
+      println("# iterations before reaching [" + givenChromosome + "]: " + search(initial, givenChromosome, rulesMap))
     }
-
-    println("# possibilities: " + possibilities.size)
 
   }
 }
