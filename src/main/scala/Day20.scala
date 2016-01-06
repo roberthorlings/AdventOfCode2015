@@ -5,7 +5,10 @@ object Day20 {
   def divisors(num: Int) : Set[Int] = num match {
     case 1 => Set(1)
     case _ => {
+      // Find all divisors upto the square root of the number
       val lowDivisors = List(1) ++ ( 2 to Math.floor(Math.sqrt(num)).toInt ).filter( num % _ == 0 )
+
+      // From those divisors, also take the 'complement' (num / divisor), which is a divisor as well
       ( lowDivisors ++ lowDivisors.map( num / _ ) ).toSet
     }
   }
