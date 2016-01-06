@@ -14,15 +14,15 @@ object Day20 {
   }
 
   def main(args: Array[String]) {
-    val input = if (args.size > 0) args(0).toLong else 3400000
+    val input = if (args.size > 0) args(0).toLong else 34000000
     val max = if (args.size > 1) args(1).toInt else 1000000
+    val numHousesPerElf = 50
 
     var house = 1
     var found = false
     while( house < max && !found ) {
-      // The number of presents is 10x the sum of all divisors
-      // However, we don't multiply by 10
-      val numPresents = divisors(house).sum
+      // The number of presents is 11x the sum of all divisors
+      val numPresents = 11 * divisors(house).filter( house / _ <= numHousesPerElf ).sum
 
       if( house % 100 == 0 ) {
         print( "." )
