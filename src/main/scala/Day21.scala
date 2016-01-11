@@ -74,11 +74,11 @@ object Day21 {
     println( "# players: " + players.size )
 
     var success = false
-    for( player <- players.sortWith( _.cost < _.cost ) ) {
+    for( player <- players.sortWith( _.cost > _.cost ) ) {
       if( !success ) {
         opponent.hitpoints = 100
 
-        if (play(player, opponent)) {
+        if (!play(player, opponent)) {
           println("Final player: " + player)
           success = true
         }
