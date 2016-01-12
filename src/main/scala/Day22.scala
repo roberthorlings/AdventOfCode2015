@@ -6,13 +6,12 @@ import scala.collection.mutable.ListBuffer
 object Day22 {
   var debug = false
 
-  class Spell(val name: String, val cost: Int, val result: (Player, Player) => Boolean) {
+  class Spell(val name: String, val cost: Int, val result: (Player, Player, Player) => Boolean) {
     override def toString(): String = name
   }
 
-  class NormalSpell(name: String, cost: Int, result: (Player, Player) => Boolean) extends Spell(name, cost, result)
-
-  class Effect(name: String, cost: Int, val timer: Int, val init: (Player, Player) => Boolean, val stop: (Player, Player) => Boolean = { (_, _) => true }) extends Spell(name, cost, init) {
+  class NormalSpell(name: String, cost: Int, result: (Player, Player, Player) => Boolean) extends Spell(name, cost, result)
+  class Effect(name: String, cost: Int, val timer: Int, val init: (Player, Player, Player) => Boolean, val stop: (Player, Player) => Boolean = { (_, _) => true }) extends Spell(name, cost, init) {
     def used(): Effect = new Effect( name, cost, timer - 1, init, stop)
   }
 
@@ -21,10 +20,10 @@ object Day22 {
 
     var effects = List.empty[Effect]
 
-    def initEffects(opponent: Player) = {
+    def initEffects(opponent: Player, playing: Boolean = true) = {
       // First perform all active effects
       effects = effects.map((effect) => {
-        effect.init(this, opponent)
+        effect.init(this, opponent, if(playing) this else opponent )
         val newEffect = effect.used()
 
         if (debug) println("  Doing effect for " + effect + "; timer is now " + newEffect.timer)
@@ -32,7 +31,7 @@ object Day22 {
       })
     }
 
-    def deinitEffects(opponent: Player) = {
+    def deinitEffects(opponent: Player, playing: Boolean = true) = {
       // Deinitialize the effects
       effects.foreach((effect) => {
         effect.stop(this, opponent)
@@ -98,7 +97,7 @@ object Day22 {
 
       // Cast the spell itself
       spell match {
-        case normalSpell: NormalSpell => normalSpell.result(this, opponent)
+        case normalSpell: NormalSpell => normalSpell.result(this, opponent, this)
         case effect: Effect => effects = effects :+ effect
       }
 
@@ -112,7 +111,7 @@ object Day22 {
     override def toString(): String = name + ": " + hitpoints + " HP"
 
     override def play(opponent: Player, spell: Spell = null): Boolean = {
-      opponent.initEffects(this)
+      opponent.initEffects(this, false)
 
       if (finished || opponent.finished)
         return true
@@ -122,7 +121,7 @@ object Day22 {
 
       if (debug) println("  " + name + " does " + damage + " damage to " + opponent.name)
 
-      opponent.deinitEffects(this)
+      opponent.deinitEffects(this, false)
 
       return (finished || opponent.finished)
     }
@@ -169,27 +168,35 @@ object Day22 {
 
   def spells(): List[Spell] = {
     List(
-      new NormalSpell("Magic Missile", 53, (player: Player, opponent: Player) => {
+      new NormalSpell("Magic Missile", 53, (player: Player, opponent: Player, _) => {
         opponent.hurt(4)
       }),
-      new NormalSpell("Drain", 73, (player: Player, opponent: Player) => {
+      new NormalSpell("Drain", 73, (player: Player, opponent: Player, _) => {
         player.heal(2) && opponent.hurt(2)
       }),
-      new Effect("Shield", 113, 6, (player: Player, opponent: Player) => {
+      new Effect("Shield", 113, 6, (player: Player, opponent: Player, _) => {
         player.updateArmor(7)
       }, (player: Player, opponent: Player) => {
         player.updateArmor(-7)
       }),
-      new Effect("Poison", 173, 6, (player: Player, opponent: Player) => {
+      new Effect("Poison", 173, 6, (player: Player, opponent: Player, _) => {
         opponent.hurt(3)
       }),
-      new Effect("Recharge", 229, 5, (player: Player, opponent: Player) => {
+      new Effect("Recharge", 229, 5, (player: Player, opponent: Player, _) => {
         player.updateMana(101)
       })
     )
   }
 
+  def hardModeEffect(): Effect = new Effect("HardMode", 0, Int.MaxValue, (player: Player, opponent: Player, whoseTurn: Player) => {
+    if( whoseTurn == player )
+      player.hurt(1)
+
+    true
+  })
+
   def actual(args: Array[String]) {
+    val hardMode = (args.size > 0 && args(0) == "hard")
     val availableSpells = spells()
 
     // Start looking for the next cheapest solution
@@ -200,9 +207,10 @@ object Day22 {
     val validPrefixes: scala.collection.mutable.ListBuffer[List[Spell]] = ListBuffer(List())
 
     while (depth < maxDepth && validPrefixes.size > 0) {
+      val combinationsToTry = for (prefix <- validPrefixes; spell <- availableSpells) yield prefix :+ spell
+
       println("Depth " + depth)
       println("Valid prefixes: " + validPrefixes.size)
-      val combinationsToTry = for (prefix <- validPrefixes; spell <- availableSpells) yield prefix :+ spell
       println("Combinations to try: " + combinationsToTry.size + " / " + Math.pow(5, depth).toInt)
 
       validPrefixes.clear()
@@ -215,6 +223,10 @@ object Day22 {
           //          val player = new Player("Player", 50, 0, 0, 500)
           val opponent = new Boss("Boss", 58, 9)
           val player = new Wizard("Player", 50, 500)
+
+          if( hardMode ) {
+            player.effects = player.effects :+ hardModeEffect
+          }
 
           try {
             play(player, opponent, combi)
@@ -250,18 +262,24 @@ object Day22 {
   }
 
   def test(args: Array[String]) {
+    val hardMode = (args.size > 0 && args(0) == "hard")
+
     debug = true
     val availableSpells = spells()
 
     val combi = List(
-      availableSpells(2),
+      availableSpells(4),
       availableSpells(3),
-      availableSpells(2),
+      availableSpells(1),
       availableSpells(0),
-      availableSpells(0)
+      availableSpells(2)
     )
     val opponent = new Boss("Boss", 60, 8)
     val player = new Wizard("Player", 60, 1000)
+
+    if( hardMode ) {
+      player.effects = player.effects :+ hardModeEffect
+    }
 
     println("Playing combination " + combi.mkString(", "))
 
@@ -276,8 +294,8 @@ object Day22 {
     val runType = if (args.size > 0) args(0) else "actual"
 
     runType match {
-      case "test" => test(args)
-      case _ => actual(args)
+      case "test" => test(args.tail)
+      case _ => actual(args.tail)
     }
   }
 }
