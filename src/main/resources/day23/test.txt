@@ -1,0 +1,6 @@
+inc a
+jio a, +22
+tpl a
+tpl a
+tpl a
+inc a
